@@ -14,15 +14,24 @@
 	<dependency>
 	    <groupId>org.codehaus.cargo</groupId>
 	    <artifactId>cargo-ant</artifactId>
-	    <version>1.2.0</version>
-	</dependency>
+            <version>1.2.0</version>
+            <exclusions>                                                                                                                                                                                              
+                <exclusion>                                                                                                                                                                                       
+                    <groupId>org.apache.ant</groupId>                                                                                                                                                               
+                    <artifactId>ant</artifactId>                                                                                                                                                         
+                </exclusion>                                                                                                                                                                                      
+                <exclusion>                                                                                                                                                                                       
+                    <groupId>org.apache.ant</groupId>                                                                                                                                                               
+                    <artifactId>ant-launcher</artifactId>                                                                                                                                                         
+                </exclusion>                                                                                                                                                                                      
+            </exclusions>      
+        </dependency>
 	<dependency>
 	    <groupId>org.apache.ant.extension.external</groupId>
 	    <artifactId>jreloader</artifactId>
 	    <version>0.4</version>
 	</dependency>
     </dependencies>
-
 
     <repositories>
 
