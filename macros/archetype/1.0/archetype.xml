@@ -111,7 +111,7 @@
 			<resolver ref="maven2-local"/>
 			<ibiblio name="jboss" root="http://repository.jboss.org/maven2/" m2compatible="true"/>
 			<ibiblio name="java-net-maven1" root="http://download.java.net/maven/1" pattern="${java.net.maven.pattern}" m2compatible="false"/>
-			<ibiblio name="mansour77" root="https://github.com/mansour77/maven/raw/master/releases" m2compatible="true"/>
+			<ibiblio name="mansour-repo" root="https://github.com/mansour77/repo/raw/master/releases" m2compatible="true"/>
 			<ibiblio name="local-staging" root="file://${user.home}/maven/releases" m2compatible="true"/>
 			<ibiblio name="java-net-maven2" root="http://download.java.net/maven/2/" m2compatible="true"/>
 			<resolver ref="public"/>

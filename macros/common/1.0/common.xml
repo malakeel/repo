@@ -1,7 +1,6 @@
 <project name="common" 
 	 xmlns:ivy="antlib:org.apache.ivy.ant" default="jar" >
 
-
     <property name="build.dir" location="target/${ant.project.name}" />
     <!-- <property name="test.dir" location="target/test" /> -->
     <!-- <property name="src.dir" location="src/main/java" /> -->
@@ -20,12 +19,12 @@
 	<ivy:retrieve pattern="lib/[conf]/[artifact].[ext]" type="jar" />
     </target>
 
-    <target name="clean" description="cleans the target directory" >
+    <target name="clean" description="--> cleans the target directory" >
 	<delete dir="${basedir}/target" />
     </target>
 
     <target name="compile" 
-	    description="compile the source code in src/main and create an exploded jar at target ">
+	    description="--> compile the source code in src/main and create an exploded jar at target ">
 	<compile-macro source="src/main"
 		       target="${build.dir}">
 	    <compile-path>
@@ -35,7 +34,7 @@
     </target>
 
     <target name="compile-test" depends="compile" 
-        description="compile the source code in src/main and create an exploded test jar ">
+        description="--> compile the source code in src/main and create an exploded test jar ">
 	<property name="target" location="${build.dir}-test" />
 	<compile-macro source="src/main"
 		       target="${target}">
@@ -55,13 +54,13 @@
 	</compile-macro>
     </target>
 
+
     <macrodef name="install"
-	      description="publish jar/source to maven repo mounted at ~/.m2/repository">
+	      description="--> publish jar/source to maven repo mounted at ~/.m2/repository">
 	<sequential>
 	    <ivy:makepom ivyfile="ivy.xml" pomfile="target/${ant.project.name}.pom">
 		<mapping conf="default" scope="compile"/>
 	    </ivy:makepom>
-
 	    <ivy:publish resolver="local"
 			 forcedeliver="true" overwrite="true" publishivy="false">
 		<artifacts pattern="target/[artifact].[ext]"/>
@@ -115,13 +114,41 @@
 	</sequential>
     </macrodef>
 
-    <!-- <target name="weave"> -->
-    <!--     <aspectj:iajc -->
-    <!--         argfiles="spacewar/debug.lst" -->
-    <!--         outjar="spacewar.jar" -->
-    <!--         classpath="lib/aspectjrt.jar"> -->
-    <!-- 	</aspectj:iajc> -->
-    <!-- </target> -->
+    <macrodef name="resources-macro" >
+	<attribute name="source" default="src/main"/>
+	<attribute name="target" default="target/${ant.project.name}"/>
+	<sequential>
+	    <copy todir="@{target}">
+		<fileset dir="@{source}/java">
+		    <include name="**/*" />
+		    <exclude name="**/*java" />
+		</fileset>
+		<fileset dir="@{source}/resources">
+		    <include name="**/*" />
+		    <exclude name="**/*java" />
+		</fileset>
+	    </copy>
+	</sequential>
+    </macrodef>
+
+    <macrodef name="resources-macro-war" >
+	<attribute name="source" default="src/main"/>
+	<attribute name="target" default="target/${ant.project.name}"/>
+	<sequential>
+	    <copy todir="@{target}">
+		<fileset dir="@{source}/java">
+		    <include name="**/*" />
+		    <exclude name="**/*java" />
+		</fileset>
+		<fileset dir="@{source}/resources">
+		    <include name="**/*" />
+		</fileset>
+		<fileset dir="@{source}/webapp">
+		    <include name="**/*" />
+		</fileset>
+	    </copy>
+	</sequential>
+    </macrodef>
 
 </project>
 
