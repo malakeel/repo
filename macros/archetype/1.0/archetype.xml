@@ -22,11 +22,13 @@
 		</import>
 
 		<target name="build">
-		    <compile-macro />
+		    <antcall target="compile" />
 		    <resources-macro />
 		</target>
 
 	    </project>
+
+
 	</echoxml>
 	<antcall target="create-ivy-files" />
 	<antcall target="create-directories" />
@@ -42,8 +44,7 @@
 
 		<target name="build">
 		    <compile-macro />
-		    <resources dir="src/main/resources"/>
-		    <resources dir="src/main/webapp"/>
+		    <resources-macro-web />
 		</target>
 	    </project>
 	</echoxml>
