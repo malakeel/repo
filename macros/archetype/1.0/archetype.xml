@@ -1,0 +1,133 @@
+<project  name="archetype" default="init-app">
+
+    <!-- <property name="common.build.file" value="http://localhost/common.xml" /> -->
+    <property name="common.build.file" 
+	      value="https://raw.github.com/mansour77/repo/master/macros/common/1.0/common.xml" />
+
+    <macrodef name="check-inputs" >
+	<sequential>
+	    <fail unless="module.name" message="module.name is required"/>
+	    <fail unless="group.name" message="group.name is required"/>
+	    <fail unless="revision" message="revision is required"/>
+	    <fail unless="package.path" message="package.path is required"/>
+	</sequential>
+    </macrodef>
+
+    <target name="init-app" >
+	<check-inputs />
+	<echoxml file="build.xml">
+	    <project name="${module.name}" default="build" >
+		<import>
+		    <url url="${common.build.file}" />
+		</import>
+
+		<target name="build">
+		    <compile-macro />
+		    <resources-macro />
+		</target>
+
+	    </project>
+	</echoxml>
+	<antcall target="create-ivy-files" />
+	<antcall target="create-directories" />
+    </target>
+
+    <target name="init-webapp" >
+	<check-inputs />
+	<echoxml file="build.xml">
+	    <project name="${module.name}" default="build" >
+		<import>
+		    <url url="${common.build.file}" />
+		</import>
+
+		<target name="build">
+		    <compile-macro />
+		    <resources dir="src/main/resources"/>
+		    <resources dir="src/main/webapp"/>
+		</target>
+	    </project>
+	</echoxml>
+	<antcall target="create-ivy-files" />
+	<antcall target="create-directories" />
+        <mkdir dir="src/main/webapp/WEB-INF" />
+
+
+        <echo file="src/main/webapp/WEB-INF/web.xml"><![CDATA[
+	<?xml version="1.0" encoding="UTF-8"?>
+	<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	version="3.0">
+
+	<display-name>${module.name}</display-name>
+
+	<servlet>
+	<servlet-name>myServlet</servlet-name>
+	<servlet-class>${group.name}.${module.name}Servlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+	<servlet-name>myServlet</servlet-name>
+	<url-pattern>/</url-pattern>
+	</servlet-mapping>
+
+	</web-app>]]>
+	</echo>
+
+    </target>
+
+    <target name="create-directories" >
+	<mkdir dir="src/main/java/${package.path}" />
+	<mkdir dir="src/test/java/${package.path}" />
+	<mkdir dir="src/main/resources" />
+    </target>
+
+    <target name="create-ivy-files" >
+	<echoxml file="ivy.xml">
+	    <ivy-module version="2.0">
+		<info module="${module.name}"  organisation="${group.name}" revision="${revision}" />
+		<configurations default="compile" >
+		    <conf name="compile" />
+		    <conf name="provided" />
+		    <conf name="plugin" />
+		</configurations>
+		<dependencies>
+
+		</dependencies>
+	    </ivy-module>
+	</echoxml>
+
+	<echoxml file="ivysettings.xml">
+	    <ivysettings>
+		<settings defaultResolver="default"/>
+		<resolvers>
+		    <ibiblio name="public" m2compatible="true" />
+		    <ibiblio name="maven2-local" m2compatible="true" root="file://${user.home}/.m2/repository/"  />
+		    <!-- This is for local publish -->
+		    <filesystem name="maven2-local-publish" m2compatible="true">
+			<artifact pattern="${user.home}/.m2/repository/[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"/>
+		    </filesystem>
+		    <chain name="default" >
+			<resolver ref="maven2-local"/>
+			<ibiblio name="jboss" root="http://repository.jboss.org/maven2/" m2compatible="true"/>
+			<ibiblio name="java-net-maven1" root="http://download.java.net/maven/1" pattern="${java.net.maven.pattern}" m2compatible="false"/>
+			<ibiblio name="mansour77" root="https://github.com/mansour77/maven/raw/master/releases" m2compatible="true"/>
+			<ibiblio name="local-staging" root="file://${user.home}/maven/releases" m2compatible="true"/>
+			<ibiblio name="java-net-maven2" root="http://download.java.net/maven/2/" m2compatible="true"/>
+			<resolver ref="public"/>
+		    </chain>
+		</resolvers>
+		<caches>
+		    <cache basedir="${user.home}/.m2/cache"
+			   ivyPattern="[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).xml"
+			   artifactPattern="[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]" >
+		    </cache>
+		</caches>
+	    </ivysettings>
+	</echoxml>
+
+    </target>
+
+
+</project>
+

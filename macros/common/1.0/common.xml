@@ -1,0 +1,130 @@
+<project name="common" 
+	 xmlns:ivy="antlib:org.apache.ivy.ant" default="jar" >
+
+
+    <property name="build.dir" location="target/${ant.project.name}" />
+    <!-- <property name="test.dir" location="target/test" /> -->
+    <!-- <property name="src.dir" location="src/main/java" /> -->
+    <property name="resources.dir" location="src/main/resources" />
+    <property name="lib.default" location="lib/compile" />
+    <property name="lib.test" location="lib/test" />
+
+    <path id="master-classpath">
+	<fileset dir="${lib.default}">
+	    <include name="*.jar" />
+	</fileset>
+    </path>
+
+    <target name="resolve" 
+	    description="--> retrieve dependencies with ivy">
+	<ivy:retrieve pattern="lib/[conf]/[artifact].[ext]" type="jar" />
+    </target>
+
+    <target name="clean" description="cleans the target directory" >
+	<delete dir="${basedir}/target" />
+    </target>
+
+    <target name="compile" 
+	    description="compile the source code in src/main and create an exploded jar at target ">
+	<compile-macro source="src/main"
+		       target="${build.dir}">
+	    <compile-path>
+		<path refid="master-classpath"/>
+	    </compile-path>
+	</compile-macro>
+    </target>
+
+    <target name="compile-test" depends="compile" 
+        description="compile the source code in src/main and create an exploded test jar ">
+	<property name="target" location="${build.dir}-test" />
+	<compile-macro source="src/main"
+		       target="${target}">
+	    <compile-path>
+		<path refid="master-classpath"/>
+	    </compile-path>
+	</compile-macro>
+	<delete dir="target/party-test/META-INF" />
+	<compile-macro source="src/test"
+		       target="${target}" >
+	    <compile-path>
+		<path refid="master-classpath"/>
+		<fileset dir="${lib.test}">
+		    <include name="*.jar" />
+		</fileset>
+	    </compile-path>
+	</compile-macro>
+    </target>
+
+    <macrodef name="install"
+	      description="publish jar/source to maven repo mounted at ~/.m2/repository">
+	<sequential>
+	    <ivy:makepom ivyfile="ivy.xml" pomfile="target/${ant.project.name}.pom">
+		<mapping conf="default" scope="compile"/>
+	    </ivy:makepom>
+
+	    <ivy:publish resolver="local"
+			 forcedeliver="true" overwrite="true" publishivy="false">
+		<artifacts pattern="target/[artifact].[ext]"/>
+	    </ivy:publish>
+	</sequential>
+
+    </macrodef>
+
+    <macrodef name="test">
+	<sequential>
+	    <compile-test />
+	    <junit printsummary="yes" 
+		   haltonfailure="yes"
+		   fork="yes">
+		<jvmarg line="-javaagent:lib/default/openjpa-all.jar" />
+		<jvmarg line="-noverify" />
+		<formatter  type="brief" usefile="flase"/>
+		<classpath>
+		    <path refid="master-classpath" />
+		    <fileset dir="lib">
+			<include name="**/*" />
+		    </fileset>
+		    <pathelement path="${build.dir}-test" />
+		</classpath>
+		<batchtest todir="target/test">
+		    <fileset dir="src/test/java">
+			<include name="**/*.java"/>
+		    </fileset>
+		</batchtest>
+	    </junit>
+	</sequential>
+    </macrodef>
+
+    <macrodef name="compile-macro" xmlns:c="compile">
+	<attribute name="source" default="src/main"/>
+	<attribute name="target" default="target/${ant.project.name}"/>
+	<element name="compile-path" />
+	<sequential>
+	    <mkdir dir="@{target}"/>
+	    <javac destdir="@{target}" 
+		   includeantruntime="false"          
+		   source="1.6" debug="yes">
+		<src path="@{source}/java"/>
+		<classpath>
+		    <compile-path />
+		</classpath>
+	    </javac>
+	    <copy todir="@{target}" failonerror="no">
+		<fileset dir="@{source}/resources"/>
+	    </copy>
+	</sequential>
+    </macrodef>
+
+    <!-- <target name="weave"> -->
+    <!--     <aspectj:iajc -->
+    <!--         argfiles="spacewar/debug.lst" -->
+    <!--         outjar="spacewar.jar" -->
+    <!--         classpath="lib/aspectjrt.jar"> -->
+    <!-- 	</aspectj:iajc> -->
+    <!-- </target> -->
+
+</project>
+
+
+
+
